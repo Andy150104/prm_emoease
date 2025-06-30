@@ -1,0 +1,79 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# Flutter/Dart/Pub related
+.dart_tool/
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+.flutter-versions
+.pub-cache/
+.pub/
+build/
+!pubspec.yaml
+!pubspec.lock
+
+# Flutter specific
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Android
+/android/.gradle/
+/android/captures/
+/android/local.properties
+/android/**/build/
+/android/**/outputs/
+android/gradle-wrapper.properties
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+/ios/Flutter/App.framework
+/ios/Flutter/Flutter.framework
+/ios/Flutter/Generated.xcconfig
+/ios/Flutter/ephemeral/
+/ios/.generated/
+/ios/**/build/
+
+# macOS
+macos/Flutter/ephemeral/
+macos/**/build/
+
+# Linux
+linux/**/build/
+
+# Web
+web/**/build/
+
+# Windows
+windows/**/build/
+
+# Symbolication / Obfuscation
+app.*.symbols
+app.*.map.json
+
+# Firebase crashlytics (if using)
+crashlytics-build.properties
+
+# Coverage
+coverage/
