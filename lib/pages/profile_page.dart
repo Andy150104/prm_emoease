@@ -51,7 +51,6 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
       body: Stack(
         children: [
-          // 1) Màn hình nền purple + back/edit
           Container(
             height: 200,
             decoration: BoxDecoration(
