@@ -23,7 +23,7 @@ class AuthService {
         body: jsonEncode({
           'email': email,
           'password': password,
-          'clientDeviceId': clientDeviceId,
+          'clientDeviceId': "BP22.250325.006",
           'deviceType': "Android"
         }),
       );
