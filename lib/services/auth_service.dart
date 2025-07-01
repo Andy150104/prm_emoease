@@ -49,4 +49,39 @@ class AuthService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('access_token');
   }
+  Future<bool> register({
+    required String fullName,
+    required String gender,
+    required String email,
+    required String phone,
+    required String password,
+    required String confirmPassword,
+  }) async {
+    final uri = Uri.parse('$_baseUrl/register');
+    final body = jsonEncode({
+      'fullName': fullName,
+      'gender': gender,
+      'email': email,
+      'phoneNumber': phone,
+      'password': password,
+      'confirmPassword': confirmPassword
+    });
+
+    try {
+      final response = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: body,
+      );
+      // In log chi tiết để debug:
+      print('REGISTER → status: ${response.statusCode}');
+      print('REGISTER → body: ${response.body}');
+
+      // Cho cả 200 và 201
+      return response.statusCode == 200 || response.statusCode == 201;
+    } catch (e) {
+      print('Lỗi khi gọi API register: $e');
+      return false;
+    }
+  }
 }

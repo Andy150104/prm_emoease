@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pe_emoease_mobileapp_flutter/pages/home_page.dart';
+import 'package:pe_emoease_mobileapp_flutter/pages/register_page.dart';
 import '../services/auth_service.dart';
 
 class LoginPage extends StatefulWidget {
@@ -158,7 +159,11 @@ class _LoginPageState extends State<LoginPage> {
                         children: [
                           const Text('Chưa có tài khoản? '),
                           GestureDetector(
-                            onTap: () {}, // chuyển sang trang Đăng ký
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(builder: (_) => const RegisterPage()),
+                              );
+                            }, // chuyển sang trang Đăng ký
                             child: Text('Đăng ký ngay! ✨',
                               style: TextStyle(color: Colors.deepPurple, fontWeight: FontWeight.bold),
                             ),
