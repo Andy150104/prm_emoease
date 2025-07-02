@@ -7,7 +7,6 @@ import 'package:pe_emoease_mobileapp_flutter/utils/device_info.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
-  // Base URL của API
   static const String _baseUrl = 'https://api.emoease.vn/auth-service/Auth';
 
   Future<String?> login({
@@ -16,6 +15,7 @@ class AuthService {
   }) async {
     final uri = Uri.parse('$_baseUrl/login');
     final clientDeviceId = await DeviceUtils.getDeviceId();
+
     try {
       final response = await http.post(
         uri,
@@ -27,15 +27,16 @@ class AuthService {
           'deviceType': "Android"
         }),
       );
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final token = data['token'] as String;
+        final refreshToken = data['refreshToken'] as String;
 
-        String token = data['token'];
-
-        Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('access_token', token);
-        return data['token'] as String?;
+        await prefs.setString('refresh_token', refreshToken);
+        return token;
       } else {
         print('Login thất bại: ${response.statusCode} – ${response.body}');
         return null;
@@ -45,10 +46,13 @@ class AuthService {
       return null;
     }
   }
+
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('access_token');
+    await prefs.remove('refresh_token');
   }
+
   Future<bool> register({
     required String fullName,
     required String gender,
@@ -73,15 +77,53 @@ class AuthService {
         headers: {'Content-Type': 'application/json'},
         body: body,
       );
-      // In log chi tiết để debug:
+
       print('REGISTER → status: ${response.statusCode}');
       print('REGISTER → body: ${response.body}');
 
-      // Cho cả 200 và 201
       return response.statusCode == 200 || response.statusCode == 201;
     } catch (e) {
       print('Lỗi khi gọi API register: $e');
       return false;
+    }
+  }
+
+  Future<String?> refreshToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('access_token');
+    final refreshToken = prefs.getString('refresh_token');
+
+    if (token == null || refreshToken == null) return null;
+
+    final uri = Uri.parse('$_baseUrl/refresh-token');
+    final body = jsonEncode({
+      'token': token,
+      'refreshToken': refreshToken,
+      'clientDeviceId': await DeviceUtils.getDeviceId(),
+    });
+
+    try {
+      final response = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: body,
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final newToken = data['token'];
+        final newRefresh = data['refreshToken'];
+
+        await prefs.setString('access_token', newToken);
+        await prefs.setString('refresh_token', newRefresh);
+        return newToken;
+      } else {
+        print('Refresh token thất bại: ${response.statusCode} – ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      print('Lỗi khi gọi refresh token: $e');
+      return null;
     }
   }
 }

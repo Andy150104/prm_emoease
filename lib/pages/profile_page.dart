@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:pe_emoease_mobileapp_flutter/pages/home_page.dart';
 import 'package:pe_emoease_mobileapp_flutter/services/auth_service.dart';
+import 'package:pe_emoease_mobileapp_flutter/services/profile_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pe_emoease_mobileapp_flutter/pages/login_page.dart';
 
@@ -14,8 +15,31 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   final purple = Colors.deepPurple;
-  int _navIndex = 3; // Hồ sơ
+  int _navIndex = 3;
   final _authService = AuthService();
+  Map<String, dynamic>? _profile;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    try {
+      final data = await ProfileService().fetchPatientProfile();
+      setState(() {
+        _profile = data['patientProfileDto'];
+        _loading = false;
+      });
+    } catch (e) {
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi tải hồ sơ: $e')),
+      );
+    }
+  }
 
   Future<void> _logout() async {
     await _authService.logout();
@@ -50,11 +74,13 @@ class _ProfilePageState extends State<ProfilePage> {
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Hồ sơ'),
         ],
       ),
-      body: Stack(
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : Stack(
         children: [
           Container(
             height: 200,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               image: DecorationImage(
                 image: AssetImage('assets/images/bg_profile.jpg'),
                 fit: BoxFit.cover,
@@ -65,7 +91,7 @@ class _ProfilePageState extends State<ProfilePage> {
             child: ListView(
               padding: const EdgeInsets.only(top: 0, bottom: 16),
               children: [
-                // a) Top bar: back + edit
+                // a) Top bar
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Row(
@@ -105,7 +131,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         children: [
                           Row(
                             children: [
-                              CircleAvatar(
+                              const CircleAvatar(
                                 radius: 36,
                                 backgroundImage: AssetImage('assets/images/avatar.jpg'),
                               ),
@@ -114,7 +140,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text('MTPS', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                                    Text(_profile?['fullName'] ?? '',
+                                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                                     const SizedBox(height: 8),
                                     Row(
                                       children: [
@@ -152,10 +179,10 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                           const Divider(height: 24),
                           Row(
-                            children: const [
-                              Icon(Icons.email, size: 20, color: Colors.grey),
-                              SizedBox(width: 8),
-                              Text('user1@gmail.com'),
+                            children: [
+                              const Icon(Icons.email, size: 20, color: Colors.grey),
+                              const SizedBox(width: 8),
+                              Text(_profile?['contactInfo']?['email'] ?? ''),
                             ],
                           ),
                         ],
@@ -182,22 +209,29 @@ class _ProfilePageState extends State<ProfilePage> {
                 const SizedBox(height: 24),
 
                 // d) Thông tin cá nhân
-                const _InfoCard(
+                _InfoCard(
                   title: 'Thông tin cá nhân',
                   fields: [
-                    _InfoField(label: 'Họ và tên', value: 'MTPS'),
-                    _InfoField(label: 'Giới tính', value: 'Nam'),
+                    _InfoField(label: 'Họ và tên', value: _profile?['fullName'] ?? ''),
+                    _InfoField(label: 'Giới tính', value: _profile?['gender'] ?? ''),
+                    _InfoField(label: 'Ngày sinh', value: _profile?['birthDate'] ?? ''),
+                    _InfoField(label: 'Tính cách', value: _profile?['personalityTraits'] ?? ''),
+                    _InfoField(label: 'Dị ứng', value: _profile?['allergies'] ?? ''),
+                    _InfoField(label: 'Trình độ học vấn', value: _profile?['job']?['educationLevel'] ?? ''),
+                    _InfoField(label: 'Nghề nghiệp', value: _profile?['job']?['jobTitle'] ?? ''),
+                    _InfoField(label: 'Ngành nghề', value: _profile?['job']?['industry']?['industryName'] ?? ''),
                   ],
                 ),
 
                 const SizedBox(height: 16),
 
                 // e) Thông tin liên hệ
-                const _InfoCard(
+                _InfoCard(
                   title: 'Thông tin liên hệ',
                   fields: [
-                    _InfoField(label: 'Email', value: 'user1@gmail.com'),
-                    _InfoField(label: 'Số điện thoại', value: '0942 074 688'),
+                    _InfoField(label: 'Email', value: _profile?['contactInfo']?['email'] ?? ''),
+                    _InfoField(label: 'Số điện thoại', value: _profile?['contactInfo']?['phoneNumber'] ?? ''),
+                    _InfoField(label: 'Địa chỉ', value: _profile?['contactInfo']?['address'] ?? ''),
                   ],
                 ),
 
@@ -235,7 +269,8 @@ class _ActionTile extends StatelessWidget {
     return Column(
       children: [
         Container(
-          width: 64, height: 64,
+          width: 64,
+          height: 64,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
@@ -281,7 +316,7 @@ class _InfoCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(f.label),
-                    Text(f.value, style: const TextStyle(fontWeight: FontWeight.w500)),
+                    Flexible(child: Text(f.value, textAlign: TextAlign.right, style: const TextStyle(fontWeight: FontWeight.w500))),
                   ],
                 ),
               )),
