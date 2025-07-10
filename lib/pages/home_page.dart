@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:pe_emoease_mobileapp_flutter/pages/profile_page.dart';
 import 'package:pe_emoease_mobileapp_flutter/services/profile_service.dart';
+import 'package:pe_emoease_mobileapp_flutter/pages/dashboard_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -145,7 +146,13 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const DashboardPage()),
+              );
+            },
+
             style: ElevatedButton.styleFrom(backgroundColor: purple, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
             child: const Text('Dashboard'),
           ),
