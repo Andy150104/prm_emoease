@@ -29,4 +29,32 @@ class ProfileService {
       throw Exception('Lỗi lấy thông tin hồ sơ [${response.statusCode}]: ${response.body}');
     }
   }
+
+  Future<void> updatePatientProfile(String id, Map<String, dynamic> updatedData) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('access_token');
+    if (token == null) {
+      throw Exception('Không tìm thấy access token, vui lòng login lại');
+    }
+
+    // Loại bỏ jobId nếu rỗng
+    if (updatedData['jobId'] == null || updatedData['jobId'].toString().isEmpty) {
+      updatedData.remove('jobId');
+    }
+
+    final uri = Uri.parse('$_baseUrl/patients/$id');
+    print('[DEBUG] Sending updatePatientProfile data: ' + jsonEncode({'patientProfileUpdate': updatedData}));
+    final response = await HttpClientWithRefresh.put(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({'patientProfileUpdate': updatedData}),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Lỗi cập nhật hồ sơ [${response.statusCode}]: ${response.body}');
+    }
+  }
 }
