@@ -4,6 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'pages/login_page.dart';
 import 'pages/home_page.dart';
+import 'pages/therapeutic_activities_page.dart';
+import 'pages/physical_activities_page.dart';
 import 'pages/chat_page.dart';
 import 'pages/chat_detail_page.dart';
 
@@ -29,6 +31,10 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(primarySwatch: Colors.deepPurple),
       // Nếu đã có token còn hạn, chuyển thẳng đến HomePage, ngược lại về LoginPage
       home: hasValidToken ? const HomePage() : const LoginPage(),
+      routes: {
+        '/therapeutic-activities': (context) => const TherapeuticActivitiesPage(),
+        '/physical-activities': (context) => const PhysicalActivitiesPage(),
+      },
     );
   }
 }

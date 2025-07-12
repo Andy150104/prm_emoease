@@ -30,6 +30,7 @@ class _ProfilePageState extends State<ProfilePage> {
   late TextEditingController _phoneNumberController;
   late TextEditingController _jobIdController;
   late TextEditingController _birthDateController;
+  String? _editingField; // Track which field is being edited
 
   @override
   void initState() {
@@ -73,7 +74,6 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _saveProfile() async {
-    if (!_formKey.currentState!.validate()) return;
     setState(() => _loading = true);
     try {
       final id = _profile?['id']?.toString() ?? '';
@@ -139,9 +139,7 @@ class _ProfilePageState extends State<ProfilePage> {
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Hồ sơ'),
         ],
       ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : Stack(
+      body: Stack(
         children: [
           Container(
             height: 200,
@@ -186,184 +184,67 @@ class _ProfilePageState extends State<ProfilePage> {
 
                 const SizedBox(height: 40),
 
-                // b) Card Profile chính
-                if (_editing)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Form(
-                      key: _formKey,
-                      child: Card(
-                        elevation: 4,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            children: [
-                              TextFormField(
-                                controller: _fullNameController,
-                                decoration: const InputDecoration(labelText: 'Họ và tên'),
-                                validator: (v) => v == null || v.isEmpty ? 'Vui lòng nhập họ tên' : null,
-                              ),
-                              const SizedBox(height: 16),
-                              // Dropdown cho giới tính
-                              DropdownButtonFormField<String>(
-                                value: _genderController.text.isNotEmpty ? _genderController.text : null,
-                                decoration: const InputDecoration(labelText: 'Giới tính'),
-                                items: const [
-                                  DropdownMenuItem(value: 'Male', child: Text('Nam')),
-                                  DropdownMenuItem(value: 'Female', child: Text('Nữ')),
-                                  DropdownMenuItem(value: 'Other', child: Text('Khác')),
-                                ],
-                                onChanged: (value) {
-                                  setState(() {
-                                    _genderController.text = value ?? '';
-                                  });
-                                },
-                                validator: (v) => v == null || v.isEmpty ? 'Vui lòng chọn giới tính' : null,
-                              ),
-                              const SizedBox(height: 16),
-                              TextFormField(
-                                controller: _emailController,
-                                decoration: const InputDecoration(labelText: 'Email'),
-                                validator: (v) => v == null || v.isEmpty ? 'Vui lòng nhập email' : null,
-                              ),
-                              const SizedBox(height: 16),
-                              TextFormField(
-                                controller: _phoneNumberController,
-                                decoration: const InputDecoration(labelText: 'Số điện thoại'),
-                                validator: (v) => v == null || v.isEmpty ? 'Vui lòng nhập số điện thoại' : null,
-                              ),
-                              const SizedBox(height: 16),
-                              TextFormField(
-                                controller: _addressController,
-                                decoration: const InputDecoration(labelText: 'Địa chỉ'),
-                                validator: (v) => v == null || v.isEmpty ? 'Vui lòng nhập địa chỉ' : null,
-                              ),
-                              const SizedBox(height: 16),
-                              // DatePicker cho ngày sinh
-                              TextFormField(
-                                controller: _birthDateController,
-                                readOnly: true,
-                                decoration: const InputDecoration(
-                                  labelText: 'Ngày sinh',
-                                  suffixIcon: Icon(Icons.calendar_today),
-                                ),
-                                onTap: () async {
-                                  DateTime? picked = await showDatePicker(
-                                    context: context,
-                                    initialDate: _birthDateController.text.isNotEmpty
-                                        ? DateTime.tryParse(_birthDateController.text) ?? DateTime(2000, 1, 1)
-                                        : DateTime(2000, 1, 1),
-                                    firstDate: DateTime(1900),
-                                    lastDate: DateTime.now(),
-                                  );
-                                  if (picked != null) {
-                                    setState(() {
-                                      _birthDateController.text = picked.toIso8601String().split('T').first;
-                                    });
-                                  }
-                                },
-                                validator: (v) => v == null || v.isEmpty ? 'Vui lòng chọn ngày sinh' : null,
-                              ),
-                              const SizedBox(height: 16),
-                              TextFormField(
-                                controller: _allergiesController,
-                                decoration: const InputDecoration(labelText: 'Dị ứng'),
-                                validator: (v) => v == null || v.isEmpty ? 'Vui lòng nhập thông tin dị ứng' : null,
-                              ),
-                              const SizedBox(height: 16),
-                              TextFormField(
-                                controller: _personalityTraitsController,
-                                decoration: const InputDecoration(labelText: 'Tính cách'),
-                                validator: (v) => v == null || v.isEmpty ? 'Vui lòng nhập thông tin tính cách' : null,
-                              ),
-                              const SizedBox(height: 24),
-                              ElevatedButton.icon(
-                                onPressed: _saveProfile,
-                                icon: const Icon(Icons.save),
-                                label: const Text('Lưu'),
-                                style: ElevatedButton.styleFrom(
-                                  minimumSize: const Size.fromHeight(48),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                ),
-                              ),
-                            ],
+                // b) Card Profile chính (avatar, tên, badge, KHÔNG có ô chỉnh sửa)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Card(
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        children: [
+                          const CircleAvatar(
+                            radius: 36,
+                            backgroundImage: AssetImage('assets/images/avatar.jpg'),
                           ),
-                        ),
-                      ),
-                    ),
-                  )
-                else
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Card(
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          children: [
-                            Row(
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const CircleAvatar(
-                                  radius: 36,
-                                  backgroundImage: AssetImage('assets/images/avatar.jpg'),
+                                Text(
+                                  _fullNameController.text,
+                                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                                 ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(_profile?['fullName'] ?? '',
-                                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                                      const SizedBox(height: 8),
-                                      Row(
-                                        children: [
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                                            decoration: BoxDecoration(
-                                              color: purple,
-                                              borderRadius: BorderRadius.circular(12),
-                                            ),
-                                            child: const Text('Người dùng', style: TextStyle(color: Colors.white)),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                                            decoration: BoxDecoration(
-                                              color: Colors.green.shade100,
-                                              borderRadius: BorderRadius.circular(12),
-                                              border: Border.all(color: Colors.green),
-                                            ),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: const [
-                                                Icon(Icons.check_circle, size: 16, color: Colors.green),
-                                                SizedBox(width: 4),
-                                                Text('Đã xác thực', style: TextStyle(color: Colors.green)),
-                                              ],
-                                            ),
-                                          ),
+                                const SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: purple,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: const Text('Người dùng', style: TextStyle(color: Colors.white)),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: Colors.green.shade100,
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(color: Colors.green),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: const [
+                                          Icon(Icons.check_circle, size: 16, color: Colors.green),
+                                          SizedBox(width: 4),
+                                          Text('Đã xác thực', style: TextStyle(color: Colors.green)),
                                         ],
                                       ),
-                                    ],
-                                  ),
-                                )
+                                    ),
+                                  ],
+                                ),
                               ],
                             ),
-                            const Divider(height: 24),
-                            Row(
-                              children: [
-                                const Icon(Icons.email, size: 20, color: Colors.grey),
-                                const SizedBox(width: 8),
-                                Text(_profile?['contactInfo']?['email'] ?? ''),
-                              ],
-                            ),
-                          ],
-                        ),
+                          )
+                        ],
                       ),
                     ),
                   ),
+                ),
 
                 const SizedBox(height: 24),
 
@@ -372,42 +253,144 @@ class _ProfilePageState extends State<ProfilePage> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
-                      _ActionTile(icon: Icons.assignment, label: 'Làm bài test\nDASS-21'),
-                      _ActionTile(icon: Icons.spa, label: 'Hoạt động\ntrị liệu'),
-                      _ActionTile(icon: Icons.fitness_center, label: 'Hoạt động\nthể chất'),
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          // TODO: Navigate to DASS-21 test if implemented
+                        },
+                        child: const _ActionTile(icon: Icons.assignment, label: 'Làm bài test\nDASS-21'),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(context, '/therapeutic-activities');
+                        },
+                        child: const _ActionTile(icon: Icons.spa, label: 'Hoạt động\ntrị liệu'),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(context, '/physical-activities');
+                        },
+                        child: const _ActionTile(icon: Icons.fitness_center, label: 'Hoạt động\nthể chất'),
+                      ),
                     ],
                   ),
                 ),
 
                 const SizedBox(height: 24),
 
-                // d) Thông tin cá nhân
-                _InfoCard(
-                  title: 'Thông tin cá nhân',
-                  fields: [
-                    _InfoField(label: 'Họ và tên', value: _profile?['fullName'] ?? ''),
-                    _InfoField(label: 'Giới tính', value: _profile?['gender'] ?? ''),
-                    _InfoField(label: 'Ngày sinh', value: _profile?['birthDate'] ?? ''),
-                    _InfoField(label: 'Tính cách', value: _profile?['personalityTraits'] ?? ''),
-                    _InfoField(label: 'Dị ứng', value: _profile?['allergies'] ?? ''),
-                    _InfoField(label: 'Trình độ học vấn', value: _profile?['job']?['educationLevel'] ?? ''),
-                    _InfoField(label: 'Nghề nghiệp', value: _profile?['job']?['jobTitle'] ?? ''),
-                    _InfoField(label: 'Ngành nghề', value: _profile?['job']?['industry']?['industryName'] ?? ''),
-                  ],
-                ),
-
-                const SizedBox(height: 16),
-
-                // e) Thông tin liên hệ
-                _InfoCard(
-                  title: 'Thông tin liên hệ',
-                  fields: [
-                    _InfoField(label: 'Email', value: _profile?['contactInfo']?['email'] ?? ''),
-                    _InfoField(label: 'Số điện thoại', value: _profile?['contactInfo']?['phoneNumber'] ?? ''),
-                    _InfoField(label: 'Địa chỉ', value: _profile?['contactInfo']?['address'] ?? ''),
-                  ],
-                ),
+                // d) Thông tin cá nhân & e) Thông tin liên hệ (inline editing)
+                if (_editing)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      children: [
+                        Card(
+                          elevation: 2,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    const Icon(Icons.person, color: Colors.deepPurple),
+                                    const SizedBox(width: 8),
+                                    const Text('Thông tin cá nhân', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                  ],
+                                ),
+                                const Divider(height: 20),
+                                _buildEditableField(label: 'Họ và tên', field: 'fullName', controller: _fullNameController, loading: _loading, alwaysEditable: true),
+                                _buildEditableField(label: 'Giới tính', field: 'gender', controller: _genderController, loading: _loading, isDropdown: true, alwaysEditable: true),
+                                _buildEditableField(label: 'Ngày sinh', field: 'birthDate', controller: _birthDateController, loading: _loading, isDate: true, alwaysEditable: true),
+                                _buildEditableField(label: 'Tính cách', field: 'personalityTraits', controller: _personalityTraitsController, loading: _loading, alwaysEditable: true),
+                                _buildEditableField(label: 'Dị ứng', field: 'allergies', controller: _allergiesController, loading: _loading, alwaysEditable: true),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Text('Trình độ học vấn'),
+                                    Flexible(child: Text(_profile?['job']?['educationLevel'] ?? '', textAlign: TextAlign.right, style: const TextStyle(fontWeight: FontWeight.w500))),
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Text('Nghề nghiệp'),
+                                    Flexible(child: Text(_profile?['job']?['jobTitle'] ?? '', textAlign: TextAlign.right, style: const TextStyle(fontWeight: FontWeight.w500))),
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Text('Ngành nghề'),
+                                    Flexible(child: Text(_profile?['job']?['industry']?['industryName'] ?? '', textAlign: TextAlign.right, style: const TextStyle(fontWeight: FontWeight.w500))),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Card(
+                          elevation: 2,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    const Icon(Icons.contact_mail, color: Colors.deepPurple),
+                                    const SizedBox(width: 8),
+                                    const Text('Thông tin liên hệ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                  ],
+                                ),
+                                const Divider(height: 20),
+                                _buildEditableField(label: 'Email', field: 'email', controller: _emailController, loading: _loading, alwaysEditable: true),
+                                _buildEditableField(label: 'Số điện thoại', field: 'phoneNumber', controller: _phoneNumberController, loading: _loading, alwaysEditable: true),
+                                _buildEditableField(label: 'Địa chỉ', field: 'address', controller: _addressController, loading: _loading, alwaysEditable: true),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        ElevatedButton.icon(
+                          onPressed: _loading ? null : _saveProfile,
+                          icon: const Icon(Icons.save),
+                          label: const Text('Lưu'),
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: const Size.fromHeight(48),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else ...[
+                  _InfoCard(
+                    title: 'Thông tin cá nhân',
+                    fields: [
+                      _InfoField(label: 'Họ và tên', value: _profile?['fullName'] ?? ''),
+                      _InfoField(label: 'Giới tính', value: _profile?['gender'] ?? ''),
+                      _InfoField(label: 'Ngày sinh', value: _profile?['birthDate'] ?? ''),
+                      _InfoField(label: 'Tính cách', value: _profile?['personalityTraits'] ?? ''),
+                      _InfoField(label: 'Dị ứng', value: _profile?['allergies'] ?? ''),
+                      _InfoField(label: 'Trình độ học vấn', value: _profile?['job']?['educationLevel'] ?? ''),
+                      _InfoField(label: 'Nghề nghiệp', value: _profile?['job']?['jobTitle'] ?? ''),
+                      _InfoField(label: 'Ngành nghề', value: _profile?['job']?['industry']?['industryName'] ?? ''),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  _InfoCard(
+                    title: 'Thông tin liên hệ',
+                    fields: [
+                      _InfoField(label: 'Email', value: _profile?['contactInfo']?['email'] ?? ''),
+                      _InfoField(label: 'Số điện thoại', value: _profile?['contactInfo']?['phoneNumber'] ?? ''),
+                      _InfoField(label: 'Địa chỉ', value: _profile?['contactInfo']?['address'] ?? ''),
+                    ],
+                  ),
+                ],
 
                 const SizedBox(height: 32),
 
@@ -431,6 +414,111 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildEditableField({
+    required String label,
+    required String field,
+    required TextEditingController controller,
+    bool loading = false,
+    bool isDate = false,
+    bool isDropdown = false,
+    bool alwaysEditable = false,
+  }) {
+    if (loading) {
+      return Row(
+        children: [
+          Expanded(child: Text(' 0{label}: Đang tải...', style: const TextStyle(color: Colors.grey))),
+        ],
+      );
+    }
+    if (_editingField == field || alwaysEditable) {
+      if (isDropdown) {
+        return Row(
+          children: [
+            Expanded(
+              child: DropdownButton<String>(
+                value: controller.text.isNotEmpty ? controller.text : null,
+                hint: Text(label),
+                items: const [
+                  DropdownMenuItem(value: 'Male', child: Text('Nam')),
+                  DropdownMenuItem(value: 'Female', child: Text('Nữ')),
+                  DropdownMenuItem(value: 'Other', child: Text('Khác')),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    controller.text = value ?? '';
+                    _editingField = null;
+                  });
+                },
+              ),
+            ),
+          ],
+        );
+      }
+      if (isDate) {
+        return Row(
+          children: [
+            Expanded(
+              child: GestureDetector(
+                onTap: () async {
+                  DateTime? picked = await showDatePicker(
+                    context: context,
+                    initialDate: controller.text.isNotEmpty
+                        ? DateTime.tryParse(controller.text) ?? DateTime(2000, 1, 1)
+                        : DateTime(2000, 1, 1),
+                    firstDate: DateTime(1900),
+                    lastDate: DateTime.now(),
+                  );
+                  if (picked != null) {
+                    setState(() {
+                      controller.text = picked.toIso8601String().split('T').first;
+                      _editingField = null;
+                    });
+                  }
+                },
+                child: AbsorbPointer(
+                  child: TextField(
+                    controller: controller,
+                    decoration: InputDecoration(
+                      labelText: label,
+                      suffixIcon: const Icon(Icons.calendar_today),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      }
+      // Không còn icon check ở cuối ô nhập
+      return TextField(
+        controller: controller,
+        autofocus: true,
+        decoration: InputDecoration(
+          labelText: label,
+        ),
+        onSubmitted: (_) {
+          setState(() => _editingField = null);
+        },
+      );
+    }
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            ' 0{label}:  0{controller.text}',
+            style: const TextStyle(fontSize: 16),
+          ),
+        ),
+        IconButton(
+          icon: const Icon(Icons.edit, color: Colors.grey),
+          onPressed: () {
+            setState(() => _editingField = field);
+          },
+        ),
+      ],
     );
   }
 }
