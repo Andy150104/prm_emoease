@@ -27,6 +27,32 @@ class HttpClientWithRefresh {
     });
   }
 
+  static Future<http.Response> put(Uri uri, {Map<String, String>? headers, Object? body}) async {
+    final token = await _getAccessToken();
+    http.Response response = await _sendPut(uri, token, headers: headers, body: body);
+
+    if (response.statusCode == 401) {
+      final newToken = await AuthService().refreshToken();
+      if (newToken != null) {
+        response = await _sendPut(uri, newToken, headers: headers, body: body);
+      } else {
+        throw Exception('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+      }
+    }
+
+    return response;
+  }
+
+  static Future<http.Response> _sendPut(Uri uri, String token, {Map<String, String>? headers, Object? body}) {
+    final requestHeaders = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+      ...?headers,
+    };
+    
+    return http.put(uri, headers: requestHeaders, body: body);
+  }
+
   static Future<String> _getAccessToken() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('access_token');
