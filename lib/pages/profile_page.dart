@@ -7,10 +7,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pe_emoease_mobileapp_flutter/pages/login_page.dart';
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({Key? key}) : super(key: key);
+  const ProfilePage({super.key});
 
   @override
-  _ProfilePageState createState() => _ProfilePageState();
+  State<ProfilePage> createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage> {
@@ -49,6 +49,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _loadProfile() async {
     try {
       final data = await ProfileService().fetchPatientProfile();
+      if (!mounted) return;
       setState(() {
         _profile = data['patientProfileDto'];
         _loading = false;
@@ -63,6 +64,7 @@ class _ProfilePageState extends State<ProfilePage> {
         _birthDateController = TextEditingController(text: _profile?['birthDate'] ?? '');
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() => _loading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Lỗi tải hồ sơ: $e')),
@@ -89,11 +91,13 @@ class _ProfilePageState extends State<ProfilePage> {
         'birthDate': _birthDateController.text,
       });
       await _loadProfile();
+      if (!mounted) return;
       setState(() => _editing = false);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Cập nhật thành công!')),
       );
     } catch (e) {
+      if (!mounted) return;
       setState(() => _loading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Lỗi cập nhật hồ sơ: $e')),
@@ -103,6 +107,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _logout() async {
     await _authService.logout();
+    if (!mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const LoginPage()),
           (route) => false,
