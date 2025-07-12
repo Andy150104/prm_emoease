@@ -57,4 +57,19 @@ class ProfileService {
       throw Exception('Lỗi cập nhật hồ sơ [${response.statusCode}]: ${response.body}');
     }
   }
+
+  // Utility to get patientProfileId from token
+  static Future<String> getPatientProfileIdFromToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('access_token');
+    if (token == null) {
+      throw Exception('Không tìm thấy access token, vui lòng login lại');
+    }
+    final payload = JwtDecoder.decode(token);
+    final profileId = (payload['profileId'] ?? payload['sub'])?.toString();
+    if (profileId == null || profileId.isEmpty) {
+      throw Exception('Claim profileId không tồn tại trong token');
+    }
+    return profileId;
+  }
 }
