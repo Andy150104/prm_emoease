@@ -372,10 +372,25 @@ class _ProfilePageState extends State<ProfilePage> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
-                      _ActionTile(icon: Icons.assignment, label: 'Làm bài test\nDASS-21'),
-                      _ActionTile(icon: Icons.spa, label: 'Hoạt động\ntrị liệu'),
-                      _ActionTile(icon: Icons.fitness_center, label: 'Hoạt động\nthể chất'),
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          // TODO: Navigate to DASS-21 test if implemented
+                        },
+                        child: const _ActionTile(icon: Icons.assignment, label: 'Làm bài test\nDASS-21'),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(context, '/therapeutic-activities');
+                        },
+                        child: const _ActionTile(icon: Icons.spa, label: 'Hoạt động\ntrị liệu'),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(context, '/physical-activities');
+                        },
+                        child: const _ActionTile(icon: Icons.fitness_center, label: 'Hoạt động\nthể chất'),
+                      ),
                     ],
                   ),
                 ),
