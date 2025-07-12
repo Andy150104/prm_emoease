@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pe_emoease_mobileapp_flutter/services/lifestyle_service.dart';
 import 'package:pe_emoease_mobileapp_flutter/services/profile_service.dart';
 
-class cPage extends StatefulWidget {
+class TherapeuticActivitiesPage extends StatefulWidget {
   const TherapeuticActivitiesPage({Key? key}) : super(key: key);
 
   @override
