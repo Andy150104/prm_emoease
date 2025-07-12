@@ -4,6 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'pages/login_page.dart';
 import 'pages/home_page.dart';
+import 'pages/chat_page.dart';
+import 'pages/chat_detail_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

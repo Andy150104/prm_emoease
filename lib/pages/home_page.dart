@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:pe_emoease_mobileapp_flutter/pages/profile_page.dart';
 import 'package:pe_emoease_mobileapp_flutter/services/profile_service.dart';
 
+import 'chat_page.dart';
+
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
 
@@ -97,6 +99,30 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // Widget header(String userName) => Padding(
+  //   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+  //   child: Row(
+  //     children: [
+  //       Expanded(
+  //         child: Column(
+  //           crossAxisAlignment: CrossAxisAlignment.start,
+  //           children: [
+  //             Text('Chào buổi tối 👋', style: TextStyle(fontSize: 16, color: purple.shade700)),
+  //             const SizedBox(height: 4),
+  //             Text(userName,
+  //                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: purple.shade900)),
+  //           ],
+  //         ),
+  //       ),
+  //       Container(
+  //         decoration: BoxDecoration(color: purple, shape: BoxShape.circle),
+  //         padding: const EdgeInsets.all(12),
+  //         child: const Icon(Icons.chat_bubble_outline, color: Colors.white),
+  //       ),
+  //     ],
+  //   ),
+  // );
+
   Widget header(String userName) => Padding(
     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
     child: Row(
@@ -112,14 +138,24 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
         ),
-        Container(
-          decoration: BoxDecoration(color: purple, shape: BoxShape.circle),
-          padding: const EdgeInsets.all(12),
-          child: const Icon(Icons.chat_bubble_outline, color: Colors.white),
+        // Đổi Icon thành InkWell/ElevatedButton/IconButton...
+        InkWell(
+          borderRadius: BorderRadius.circular(30),
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => ChatPage()), // <-- Đổi tên nếu file khác
+            );
+          },
+          child: Container(
+            decoration: BoxDecoration(color: purple, shape: BoxShape.circle),
+            padding: const EdgeInsets.all(12),
+            child: const Icon(Icons.chat_bubble_outline, color: Colors.white),
+          ),
         ),
       ],
     ),
   );
+
 
   Widget statusCard(Color purple) => Padding(
     padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -213,14 +249,23 @@ class _HomePageState extends State<HomePage> {
     padding: const EdgeInsets.symmetric(horizontal: 24),
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: const [
-        QuickTile(icon: Icons.calendar_today, label: 'Lịch trình'),
-        QuickTile(icon: Icons.psychology, label: 'Đánh giá'),
-        QuickTile(icon: Icons.group, label: 'Hồ sơ'),
-        QuickTile(icon: Icons.chat_bubble, label: 'Emo'),
+      children: [
+        const QuickTile(icon: Icons.calendar_today, label: 'Lịch trình'),
+        const QuickTile(icon: Icons.psychology, label: 'Đánh giá'),
+        const QuickTile(icon: Icons.group, label: 'Hồ sơ'),
+        QuickTile(
+          icon: Icons.chat_bubble,
+          label: 'Emo',
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const ChatPage()),
+            );
+          },
+        ),
       ],
     ),
   );
+
 
   Widget usefulSuggestions(Color purple) => Column(
     children: [
@@ -315,22 +360,27 @@ class _AnimatedEntryState extends State<AnimatedEntry> with SingleTickerProvider
 class QuickTile extends StatelessWidget {
   final IconData icon;
   final String label;
-  const QuickTile({required this.icon, required this.label, Key? key}) : super(key: key);
+  final VoidCallback? onTap;
+  const QuickTile({required this.icon, required this.label, this.onTap, Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final purple = Colors.deepPurple;
-    return Column(
-      children: [
-        Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(color: purple.shade50, shape: BoxShape.circle),
-          child: Icon(icon, color: purple),
-        ),
-        const SizedBox(height: 8),
-        Text(label, style: const TextStyle(fontSize: 12)),
-      ],
+    return InkWell(
+      borderRadius: BorderRadius.circular(30),
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(color: purple.shade50, shape: BoxShape.circle),
+            child: Icon(icon, color: purple),
+          ),
+          const SizedBox(height: 8),
+          Text(label, style: const TextStyle(fontSize: 12)),
+        ],
+      ),
     );
   }
 }
