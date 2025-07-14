@@ -6,6 +6,8 @@ import 'pages/login_page.dart';
 import 'pages/home_page.dart';
 import 'pages/therapeutic_activities_page.dart';
 import 'pages/physical_activities_page.dart';
+import 'pages/chat_page.dart';
+import 'pages/chat_detail_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
