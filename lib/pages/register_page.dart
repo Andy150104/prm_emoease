@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pe_emoease_mobileapp_flutter/pages/login_page.dart';
 import '../services/auth_service.dart';
 
@@ -51,7 +52,18 @@ class _RegisterPageState extends State<RegisterPage> {
     );
 
     if (success) {
-      Navigator.of(context).push(
+      Fluttertoast.showToast(
+        msg: "Đã gửi xác nhận đến email của bạn",
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.black87,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+
+      // Chờ một chút rồi chuyển về LoginPage
+      await Future.delayed(const Duration(seconds: 2));
+      Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const LoginPage()),
       );
     } else {

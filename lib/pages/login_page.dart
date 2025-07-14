@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pe_emoease_mobileapp_flutter/pages/home_page.dart';
 import 'package:pe_emoease_mobileapp_flutter/pages/register_page.dart';
 import '../services/auth_service.dart';
+import '../main.dart' show scheduleAutoLogout;
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -25,6 +26,7 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => _loading = false);
 
     if (token != null) {
+      scheduleAutoLogout();
       Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const HomePage()),
       );
