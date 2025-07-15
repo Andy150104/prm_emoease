@@ -70,4 +70,28 @@ class LifestyleService {
       throw Exception('Lỗi lưu hoạt động trị liệu [${response.statusCode}]: ${response.body}');
     }
   }
+
+  Future<List<dynamic>> getPatientPhysicalActivities(String patientProfileId) async {
+    final uri = Uri.parse('$_baseUrl/patient-physical-activities/$patientProfileId');
+    final response = await HttpClientWithRefresh.get(uri);
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      // Sửa đúng key trả về từ API
+      return data['patientPhysicalActivities'] as List<dynamic>? ?? [];
+    } else {
+      throw Exception('Lỗi lấy hoạt động thể chất theo tài khoản [${response.statusCode}]: ${response.body}');
+    }
+  }
+
+  Future<List<dynamic>> getPatientTherapeuticActivities(String patientProfileId) async {
+    final uri = Uri.parse('$_baseUrl/patient-therapeutic-activities/$patientProfileId');
+    final response = await HttpClientWithRefresh.get(uri);
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      // Sửa đúng key trả về từ API
+      return data['patientTherapeuticActivities'] as List<dynamic>? ?? [];
+    } else {
+      throw Exception('Lỗi lấy hoạt động trị liệu theo tài khoản [${response.statusCode}]: ${response.body}');
+    }
+  }
 }
