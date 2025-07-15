@@ -1,12 +1,10 @@
-// lib/services/http_client_with_refresh.dart
-
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'auth_service.dart';
 
 class HttpClientWithRefresh {
-  // private constructor để tránh khởi tạo
+  // Private constructor
   HttpClientWithRefresh._();
 
   /// GET với auto-refresh khi 401
@@ -21,6 +19,7 @@ class HttpClientWithRefresh {
       token,
       headers: headers,
     );
+
     if (response.statusCode == 401) {
       final newToken = await AuthService().refreshToken();
       if (newToken != null) {
@@ -34,6 +33,7 @@ class HttpClientWithRefresh {
         throw Exception('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
       }
     }
+
     return response;
   }
 
@@ -51,6 +51,7 @@ class HttpClientWithRefresh {
       headers: headers,
       body: body,
     );
+
     if (response.statusCode == 401) {
       final newToken = await AuthService().refreshToken();
       if (newToken != null) {
@@ -65,10 +66,11 @@ class HttpClientWithRefresh {
         throw Exception('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
       }
     }
+
     return response;
   }
 
-  /// Helper chung cho GET/PUT (và dễ mở rộng POST, DELETE…)
+  /// Phương thức dùng chung cho GET/PUT
   static Future<http.Response> _sendRequest(
       String method,
       Uri uri,
@@ -81,7 +83,8 @@ class HttpClientWithRefresh {
       'Authorization': 'Bearer $token',
       ...?headers,
     };
-    final encodedBody = body != null ? jsonEncode(body) : null;
+
+    final encodedBody = (body is String || body == null) ? body : jsonEncode(body);
 
     switch (method) {
       case 'GET':
@@ -93,7 +96,7 @@ class HttpClientWithRefresh {
     }
   }
 
-  /// Lấy access token từ SharedPreferences
+  /// Lấy access_token từ SharedPreferences
   static Future<String> _getAccessToken() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('access_token');
