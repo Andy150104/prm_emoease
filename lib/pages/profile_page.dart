@@ -1,6 +1,7 @@
 // profile_page.dart
 import 'package:flutter/material.dart';
 import 'package:pe_emoease_mobileapp_flutter/pages/home_page.dart';
+import 'package:pe_emoease_mobileapp_flutter/pages/test_page.dart';
 import 'package:pe_emoease_mobileapp_flutter/services/auth_service.dart';
 import 'package:pe_emoease_mobileapp_flutter/services/profile_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -256,7 +257,9 @@ class _ProfilePageState extends State<ProfilePage> {
                     children: [
                       GestureDetector(
                         onTap: () {
-                          // TODO: Navigate to DASS-21 test if implemented
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const TestPage(),
+                          ));
                         },
                         child: const _ActionTile(icon: Icons.assignment, label: 'Làm bài test\nDASS-21'),
                       ),
