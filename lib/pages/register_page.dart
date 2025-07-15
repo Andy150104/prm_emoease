@@ -1,3 +1,4 @@
+// register_page.dart
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pe_emoease_mobileapp_flutter/pages/login_page.dart';

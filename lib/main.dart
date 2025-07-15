@@ -1,10 +1,13 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'pages/login_page.dart';
 import 'pages/home_page.dart';
+import 'pages/therapeutic_activities_page.dart';
+import 'pages/physical_activities_page.dart';
+import 'pages/chat_page.dart';
+import 'pages/chat_detail_page.dart';
 
 
 
@@ -38,6 +41,10 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.deepPurple),
       home: hasValidToken ? const HomePage() : const LoginPage(),
+      routes: {
+        '/therapeutic-activities': (context) => const TherapeuticActivitiesPage(),
+        '/physical-activities': (context) => const PhysicalActivitiesPage(),
+      },
     );
   }
 }
