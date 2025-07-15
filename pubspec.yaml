@@ -37,7 +37,9 @@ dependencies:
   device_info_plus: ^11.5.0
   jwt_decoder: ^2.0.1
   shared_preferences: ^2.5.3
+  fluttertoast: ^8.2.12
   fl_chart: ^0.64.0
+
 
 dev_dependencies:
   flutter_test:

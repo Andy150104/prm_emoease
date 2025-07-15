@@ -1,4 +1,4 @@
-//main.dart
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
@@ -9,14 +9,24 @@ import 'pages/physical_activities_page.dart';
 import 'pages/chat_page.dart';
 import 'pages/chat_detail_page.dart';
 
+
+
+final navigatorKey = GlobalKey<NavigatorState>();
+final messengerKey = GlobalKey<ScaffoldMessengerState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final prefs = await SharedPreferences.getInstance();
   final token = prefs.getString('access_token');
-  final bool hasValidToken = token != null && !JwtDecoder.isExpired(token);
+  final hasValid = token != null && !JwtDecoder.isExpired(token);
 
-  runApp(MyApp(hasValidToken: hasValidToken));
+  // Nếu token còn hạn, khởi tạo Timer tự động logout
+  if (hasValid) {
+    scheduleAutoLogout();
+  }
+
+  runApp(MyApp(hasValidToken: hasValid));
 }
 
 class MyApp extends StatelessWidget {
@@ -26,10 +36,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Emoease',
+      navigatorKey: navigatorKey,
+      scaffoldMessengerKey: messengerKey,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.deepPurple),
-      // Nếu đã có token còn hạn, chuyển thẳng đến HomePage, ngược lại về LoginPage
       home: hasValidToken ? const HomePage() : const LoginPage(),
       routes: {
         '/therapeutic-activities': (context) => const TherapeuticActivitiesPage(),
@@ -37,4 +47,34 @@ class MyApp extends StatelessWidget {
       },
     );
   }
+}
+
+// Hàm đặt lịch tự logout
+void scheduleAutoLogout() async {
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('access_token');
+  if (token == null) return; // chưa login
+
+  DateTime exp = JwtDecoder.getExpirationDate(token);
+  Duration untilExpire = exp.difference(DateTime.now());
+
+  // Nếu đã quá hạn thì logout ngay
+  if (untilExpire.isNegative) {
+    _doLogout();
+  } else {
+    Timer(untilExpire, _doLogout);
+  }
+}
+
+void _doLogout() async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.remove('access_token');
+
+  navigatorKey.currentState?.pushAndRemoveUntil(
+    MaterialPageRoute(builder: (_) => const LoginPage()),
+        (_) => false,
+  );
+  messengerKey.currentState?.showSnackBar(
+    const SnackBar(content: Text('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.')),
+  );
 }
