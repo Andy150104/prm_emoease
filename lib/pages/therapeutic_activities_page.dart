@@ -14,19 +14,52 @@ class _TherapeuticActivitiesPageState extends State<TherapeuticActivitiesPage> {
   bool _loading = true;
   List<dynamic> _activities = [];
   Set<int> _selectedIndexes = {};
+  final Set<String> _patientActivityIds = {}; // Lưu therapeuticActivityId của bệnh nhân
 
   @override
   void initState() {
     super.initState();
-    _fetchActivities();
+    _fetchAll();
   }
 
-  Future<void> _fetchActivities() async {
-    final data = await _service.fetchTherapeuticActivities();
-    setState(() {
-      _activities = data;
-      _loading = false;
-    });
+  Future<void> _fetchAll() async {
+    setState(() => _loading = true);
+    try {
+      final patientProfileId = await ProfileService.getPatientProfileIdFromToken();
+      final all = await _service.fetchTherapeuticActivities();
+      final patient = await _service.getPatientTherapeuticActivities(patientProfileId);
+      final Set<String> patientIds = {};
+      final Set<int> selectedIndexes = {};
+      for (final item in patient) {
+        if (item['therapeuticActivityId'] != null) {
+          patientIds.add(item['therapeuticActivityId']);
+        }
+      }
+      // Debug log: print all ids
+      print('All activities ids: ' + all.map((e) => e['id']).toList().toString());
+      print('Patient therapeuticActivityIds: ' + patientIds.toString());
+      for (int i = 0; i < all.length; i++) {
+        if (patientIds.contains(all[i]['id'])) {
+          print('MATCH: activity id ${all[i]['id']} is in patient therapeuticActivityIds');
+          selectedIndexes.add(i);
+        } else {
+          print('NO MATCH: activity id ${all[i]['id']}');
+        }
+      }
+      setState(() {
+        _activities = all;
+        _patientActivityIds
+          ..clear()
+          ..addAll(patientIds);
+        _selectedIndexes = selectedIndexes;
+        _loading = false;
+      });
+    } catch (e) {
+      setState(() => _loading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Lỗi: $e')));
+      }
+    }
   }
 
   IconData getActivityIcon(String name) {
@@ -168,7 +201,23 @@ class _TherapeuticActivitiesPageState extends State<TherapeuticActivitiesPage> {
                                       ),
                                     ),
                                     const SizedBox(height: 8),
-                                    if (isSelected)
+                                    if (isSelected && _patientActivityIds.contains(activity['id']))
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: Colors.green.shade100,
+                                          borderRadius: BorderRadius.circular(20),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(Icons.calendar_today, color: Colors.green, size: 16),
+                                            const SizedBox(width: 4),
+                                            const Text('Hằng ngày', style: TextStyle(color: Colors.green, fontWeight: FontWeight.w600)),
+                                          ],
+                                        ),
+                                      )
+                                    else if (isSelected)
                                       Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                                         decoration: BoxDecoration(

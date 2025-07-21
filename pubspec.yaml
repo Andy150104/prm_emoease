@@ -42,6 +42,10 @@ dependencies:
   url_launcher: ^6.2.4
   dio: ^5.0.0
   webview_flutter: ^4.2.2
+  fluttertoast: ^8.2.12
+  fl_chart: ^1.0.0
+
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -51,7 +55,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -65,6 +69,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/emoEase.jpg
+    - assets/images/emo.jpg
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
