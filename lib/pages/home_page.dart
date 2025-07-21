@@ -1,8 +1,10 @@
 // home_page.dart
 import 'package:flutter/material.dart';
 import 'package:pe_emoease_mobileapp_flutter/pages/profile_page.dart';
+import 'package:pe_emoease_mobileapp_flutter/pages/subscription_page.dart';
 import 'package:pe_emoease_mobileapp_flutter/services/profile_service.dart';
 import 'package:pe_emoease_mobileapp_flutter/pages/dashboard_page.dart';
+import 'package:pe_emoease_mobileapp_flutter/pages/schedule_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -78,7 +80,11 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       body: SafeArea(
-        child: ListView(
+        child: _navIndex == 1
+            ? const SchedulePage()
+            : _navIndex == 2
+            ? const SubscriptionPage()
+            : ListView(
           padding: const EdgeInsets.only(bottom: 16),
           children: [
             AnimatedEntry(delay: 100, child: header(userName)),
