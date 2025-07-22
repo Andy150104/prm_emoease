@@ -11,14 +11,22 @@ class ScheduleService {
     required int pageIndex,
     required int pageSize,
   }) async {
+    print('[Service] Lấy SharedPreferences...');
     final prefs = await SharedPreferences.getInstance();
+
     final token = prefs.getString('access_token');
+    print('[Service] Token: $token');
+
     if (token == null) {
       throw Exception('Không tìm thấy access token, vui lòng login lại');
     }
 
     final payload = JwtDecoder.decode(token);
+    print('[Service] Payload: $payload');
+
     final patientId = (payload['profileId'] ?? payload['sub'])?.toString();
+    print('[Service] patientId: $patientId');
+
     if (patientId == null || patientId.isEmpty) {
       throw Exception('Claim profileId không tồn tại trong token');
     }
@@ -26,16 +34,22 @@ class ScheduleService {
     final uri = Uri.parse(
       '$_baseUrl/schedules?PageIndex=$pageIndex&PageSize=$pageSize&SortBy=startDate&SortOrder=asc&PatientId=$patientId',
     );
-    
-    final response = await HttpClientWithRefresh.get(uri);
+    print('[Service] Gọi API: $uri');
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
-      return data['schedules'] as Map<String, dynamic>;
-    } else {
-      throw Exception('Lỗi lấy lịch trình [${response.statusCode}]: ${response.body}');
+    final response = await HttpClientWithRefresh.get(uri);
+    print('[Service] Status code: ${response.statusCode}');
+    print('[Service] Body: ${response.body}');
+
+    final data = jsonDecode(response.body);
+    final schedules = data['schedules'] as Map<String, dynamic>;
+
+    if (!schedules.containsKey('data')) {
+      throw Exception('Kết quả không có "data"');
     }
+
+    return schedules;
   }
+
 
   Future<Map<String, dynamic>> fetchActivities(String sessionId) async {
     final prefs = await SharedPreferences.getInstance();
@@ -79,6 +93,39 @@ class ScheduleService {
       throw Exception('Lỗi lấy tổng phiên [${response.statusCode}]: ${response.body}');
     }
   }
+
+  Future<int> getTotalSessionsCountForSchedule({
+    required String scheduleId,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('access_token');
+    if (token == null) {
+      throw Exception('Không tìm thấy access token, vui lòng login lại');
+    }
+
+    final formattedStart = startDate.toIso8601String();
+    final formattedEnd = endDate.toIso8601String();
+
+    final uri = Uri.parse(
+      '$_baseUrl/schedule/get-total-sessions'
+          '?ScheduleId=$scheduleId'
+          '&StartDate=$formattedStart'
+          '&EndDate=$formattedEnd',
+    );
+
+    final response = await HttpClientWithRefresh.get(uri);
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final List<dynamic> sessions = data['sessions'] ?? [];
+      return sessions.length;
+    } else {
+      throw Exception('Lỗi lấy tổng số phiên [${response.statusCode}]: ${response.body}');
+    }
+  }
+
 
   Future<bool> updateActivityStatus({
     required String taskId,
