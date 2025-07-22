@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:pe_emoease_mobileapp_flutter/pages/pdf_preview_page.dart';
 import '../models/test_result.dart';
 
 class ResultPage extends StatefulWidget {
   final TestResult testResult;
-  const ResultPage({Key? key, required this.testResult}) : super(key: key);
+  final String filePath;
+  const ResultPage({Key? key, required this.testResult, required this.filePath}) : super(key: key);
 
   @override
   _ResultPageState createState() => _ResultPageState();
@@ -55,6 +57,19 @@ class _ResultPageState extends State<ResultPage> with SingleTickerProviderStateM
         centerTitle: true,
         backgroundColor: sevColor,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.picture_as_pdf),
+            tooltip: 'Xem PDF kết quả',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => PdfViewPage(filePath: widget.filePath),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: FadeTransition(
         opacity: _fadeAnim,

@@ -70,7 +70,7 @@ class AuthService {
       'password': password,
       'confirmPassword': confirmPassword
     });
-
+    print('REGISTER → status: ${body}');
     try {
       final response = await http.post(
         uri,
@@ -124,6 +124,27 @@ class AuthService {
     } catch (e) {
       print('Lỗi khi gọi refresh token: $e');
       return null;
+    }
+  }
+  Future<bool> forgotPassword({ required String email }) async {
+    final uri = Uri.parse('$_baseUrl/forgot-password');
+    final body = jsonEncode({'email': email});
+    final headers = {'Content-Type': 'application/json'};
+    print('🔹 Gửi yêu cầu forgot password tới: $uri');
+    print('📦 Payload (body): $body');
+    print('🔹 Email: $email');
+    try {
+      final response = await http.post(
+        uri,
+        headers: headers,
+        body: body,
+      );
+      print('🔹 Status Code: ${response.statusCode}');
+      print('🔹 Response Body: ${response.body}');
+      return response.statusCode == 200;
+    } catch (e) {
+      print('Lỗi forgotPassword: $e');
+      return false;
     }
   }
 }

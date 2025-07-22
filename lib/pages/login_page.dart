@@ -4,6 +4,7 @@ import 'package:pe_emoease_mobileapp_flutter/pages/home_page.dart';
 import 'package:pe_emoease_mobileapp_flutter/pages/register_page.dart';
 import '../services/auth_service.dart';
 import '../main.dart' show scheduleAutoLogout;
+import 'forgot_password_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -145,7 +146,12 @@ class _LoginPageState extends State<LoginPage> {
 
                       const SizedBox(height: 16),
                       TextButton(
-                        onPressed: () { /* quên mật khẩu */ },
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const ForgotPasswordPage()),
+                          );
+
+                        },
                         child: Text('Quên mật khẩu? 🤔', style: TextStyle(color: Colors.deepPurple.shade700)),
                       ),
 
