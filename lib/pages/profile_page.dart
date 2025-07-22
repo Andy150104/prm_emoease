@@ -1,6 +1,8 @@
 // profile_page.dart
 import 'package:flutter/material.dart';
 import 'package:pe_emoease_mobileapp_flutter/pages/home_page.dart';
+import 'package:pe_emoease_mobileapp_flutter/pages/schedule_page.dart';
+import 'package:pe_emoease_mobileapp_flutter/pages/subscription_page.dart';
 import 'package:pe_emoease_mobileapp_flutter/pages/test_page.dart';
 import 'package:pe_emoease_mobileapp_flutter/services/auth_service.dart';
 import 'package:pe_emoease_mobileapp_flutter/services/profile_service.dart';
@@ -121,13 +123,29 @@ class _ProfilePageState extends State<ProfilePage> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _navIndex,
         onTap: (i) {
-          if (i == 0) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const HomePage()),
-            );
-          } else {
-            setState(() => _navIndex = i);
+          setState(() => _navIndex = i);
+          switch (i) {
+            case 0:
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const HomePage()),
+              );
+              break;
+            case 1:
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SchedulePage()),
+              );
+              break;
+            case 2:
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SubscriptionPage()),
+              );
+              break;
+            case 3:
+            // đây là chính ProfilePage, không cần push tiếp
+              break;
           }
         },
         selectedItemColor: purple,
