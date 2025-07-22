@@ -39,7 +39,10 @@ dependencies:
   shared_preferences: ^2.5.3
   fluttertoast: ^8.2.12
   fl_chart: ^1.0.0
-
+  syncfusion_flutter_pdfviewer: ^30.1.40
+  flutter_pdfview: ^1.0.7
+  path_provider: ^2.0.14
+  permission_handler: ^12.0.1
 
 dev_dependencies:
   flutter_test:

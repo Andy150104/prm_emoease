@@ -1,4 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:pe_emoease_mobileapp_flutter/pages/pdf_preview_page.dart';
 import 'package:pe_emoease_mobileapp_flutter/pages/result_page.dart';
 import '../models/question.dart';
 import '../models/test_result.dart';
@@ -85,12 +89,27 @@ class _TestPageState extends State<TestPage> with TickerProviderStateMixin {
         testId: _testId,
         selectedOptionIds: selectedIds,
       );
+      final pdfBytes = await _tService.exportResultPdf(
+        testId: _testId,
+        selectedOptionIds: selectedIds,
+      );
+      final dir = await getTemporaryDirectory();
+      final file = File('${dir.path}/result_${DateTime.now().millisecondsSinceEpoch}.pdf');
+      await file.writeAsBytes(pdfBytes, flush: true);
+
+      print('▶️ pdfBytes length = ${pdfBytes.length}');
+      print('▶️ header = ${String.fromCharCodes(pdfBytes.take(4).toList())}');
       Navigator.of(context).pop();
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (_) => ResultPage(testResult: result),
+          builder: (_) => ResultPage(testResult: result, filePath: file.path,),
         ),
       );
+      // Navigator.of(context).push(
+      //   MaterialPageRoute(
+      //     builder: (_) => PdfViewPage(filePath: file.path),
+      //   ),
+      // );
     } catch (e) {
       Navigator.of(context).pop();
       showDialog(
