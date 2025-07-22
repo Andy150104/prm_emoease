@@ -97,7 +97,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       final String paymentUrl = await _service!.createUserSubscription(
         patientId: _patientId!,
         servicePackageId: selectedPlan['id'],
-        paymentMethodName: 'VNPay',
+        paymentMethodName: 'PayOS',
         promoCode: promoCode,
       );
 
@@ -106,6 +106,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           context,
           MaterialPageRoute(builder: (_) => PaymentWebView(url: paymentUrl)),
         );
+
+        print("result ${result}");
 
         if (result == true) {
           if (!mounted) return;
